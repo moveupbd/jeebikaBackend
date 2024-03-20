@@ -11,12 +11,20 @@ venv.bak/
 .pybuilder/
 target/
 
+<<<<<<< HEAD
 # Django stuff
+=======
+# Django stuff:
+>>>>>>> 4852f1117a6763185cda6e71bf2a5cf21feb8473
 *.log
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 4852f1117a6763185cda6e71bf2a5cf21feb8473
 # Distribution / packaging
 .Python
 build/
@@ -35,6 +43,10 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+<<<<<<< HEAD
 
 # Python bytecode cache
 __pycache__/
+=======
+MANIFEST
+>>>>>>> 4852f1117a6763185cda6e71bf2a5cf21feb8473
