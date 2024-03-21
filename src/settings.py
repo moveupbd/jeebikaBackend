@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-jie+y6&hk8$&fe&&_qvhb8xj@30oakd8t)hkv8d9&dvh#2mi$k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['jeebika.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -152,6 +152,7 @@ AUTH_USER_MODEL = "accountio.User"
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",
     "http://localhost:3000",
+    "https://jeebika.com",
 ]
 
 # jwt settings
