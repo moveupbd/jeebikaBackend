@@ -1,6 +1,6 @@
 from django.contrib import admin
 from applicants.models import Applicant, skill_list
-from employees.models import Employee, job_post, service_type, category, Industry_type
+from employees.models import Employee, job_post, service_type, category, Industry_type, company_type ,License_type
 from .models import User
 
 
@@ -13,3 +13,5 @@ admin.site.register(Employee)
 admin.site.register(category)
 admin.site.register(service_type)
 admin.site.register(job_post)
+admin.site.register(company_type)
+admin.site.register(License_type)

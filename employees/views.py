@@ -11,18 +11,19 @@ from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.filters import SearchFilter
+from rest_framework.exceptions import ValidationError
 
 from .serializers import PublicEmployeeRegistrationSerializer, PrivateEmployeeProfileSerializer, PublicEmployeeLoginSerializer, PrivateEmployeePostSerializer
 from accountio.models import User
 from common.permissions import IsEmployeeUser
 from .models import Employee, job_post
 
+from django.http import HttpResponse
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class PublicEmployeeRegistrationView(CreateAPIView):
     serializer_class = PublicEmployeeRegistrationSerializer
         
-from django.http import HttpResponse
-from rest_framework_simplejwt.tokens import RefreshToken
 
 class PublicEmployeeLogin(CreateAPIView):
     serializer_class = PublicEmployeeLoginSerializer
@@ -87,28 +88,32 @@ class PrivateEmployeeProfile(RetrieveUpdateAPIView):
     
 class PrivateEmployeeposts(ListCreateAPIView):
     serializer_class = PrivateEmployeePostSerializer
-    permission_classes = [IsAuthenticated, IsEmployeeUser]
+    permission_classes = [IsAuthenticated]
     filter_backends = [SearchFilter]
     search_fields = ["category__name"]
     
-    queryset = job_post.objects.all()
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def get_queryset(self):
+        user = self.request.user
+        return job_post.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        # Automatically set the user field to the authenticated user during creation
+        serializer.save(user=self.request.user)
+
 
 class PrivateEmployeePostDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = PrivateEmployeePostSerializer
     permission_classes = [IsAuthenticated, IsEmployeeUser]
-    queryset = job_post.objects.all()
-    
+
     def get_object(self):
-        uid = self.kwargs.get("post_uid", None)
-        
-        return get_object_or_404(
-            job_post.objects.filter(), uid=uid
-        )
+        uid = self.kwargs.get("post_uid")
+        if uid is None:
+            # Handle the case where `post_uid` is not provided in the URL
+            raise ValidationError("Post UID is required.")
+
+        # Filter job_post queryset by UID
+        return get_object_or_404(job_post, uid=uid)
+
 
     
 

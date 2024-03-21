@@ -22,7 +22,7 @@ class PublicEmployeeRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employee
-        fields = ['user', 'password', 'confirm_password', 'designation', 'company_name', 'company_address', 'company_size', 'industry_type', 'id_pic_front', 'id_pic_back','year_of_eastablishment', 'business_desc', 'trade_number', 'registration_number', 'website_url']
+        fields = ['user', 'password', 'confirm_password', 'company_name', 'company_address', 'company_logo', 'website_url', 'company_size', 'industry_type', 'id_card_front', 'id_card_back','year_of_eastablishment', 'business_desc', 'license_type', 'license_number', 'license_copy', 'company_owner', 'employee_designation', 'employee_mobile', 'employee_email', 'employee_address']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -68,7 +68,7 @@ class PrivateEmployeeProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Employee
-        fields = ['user', 'designation', 'company_name', 'company_address', 'company_size', 'industry_type', 'id_pic_front', 'id_pic_back', 'year_of_eastablishment', 'business_desc', 'trade_number', 'registration_number', 'website_url']
+        fields = ['user', 'company_name', 'company_address', 'company_logo', 'website_url', 'company_size', 'industry_type', 'id_card_front', 'id_card_back','year_of_eastablishment', 'business_desc', 'license_type', 'license_number', 'license_copy', 'company_owner', 'employee_designation', 'employee_mobile', 'employee_email', 'employee_address']
 
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
@@ -85,4 +85,4 @@ class PrivateEmployeeProfileSerializer(serializers.ModelSerializer):
 class PrivateEmployeePostSerializer(serializers.ModelSerializer):
     class Meta:
         model = job_post
-        fields = ['uid', 'company_title', 'category', 'service_type', 'designation', 'vacancy', 'published', 'deadline', 'responsibilities', 'employment_status', 'skill', 'requirements','expertise', 'experience', 'location', 'company_info','compensation', 'apply_procedure' ]
+        fields = ['uid','user', 'company_title', 'category', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'skill', 'requirements','expertise', 'experience', 'location', 'company_info','compensation', 'other_facilities', 'apply_procedure' ]

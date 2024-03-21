@@ -23,9 +23,13 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+from .views import hello_world, PublicEmployeeposts
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("", hello_world, name='hello_world'),
+    path("job-posts/", PublicEmployeeposts.as_view(), name='alljobposts'),
     path("auth/applicant/", include("applicants.urls")),
     path("auth/employee/", include("employees.urls")),
     path("auth/user/", include("accountio.urls")),

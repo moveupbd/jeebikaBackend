@@ -3,11 +3,15 @@ from django.contrib.auth.hashers import check_password
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.response import Response
 from rest_framework import status
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.authentication import SessionAuthentication
+from rest_framework.filters import SearchFilter
+from rest_framework.generics import ListAPIView
+
+from common.permissions import IsEmployeeUser
+from employees.models import job_post
+from employees.serializers import PrivateEmployeePostSerializer
 
 from .serializers import PublicApplicantRegistrationSerializer, PrivateApplicantProfileSerializer, PublicApplicantLoginSerializer
 from accountio.models import User
@@ -82,4 +86,11 @@ class PrivateApplicantProfile(RetrieveUpdateAPIView):
         return Response(serializer.data)
         
         
+
+class PublicEmployeeposts(ListAPIView):
+    serializer_class = PrivateEmployeePostSerializer
+    permission_classes = []
+    filter_backends = [SearchFilter]
+    search_fields = ["category__name"]
+    queryset = job_post.objects.all()
         
