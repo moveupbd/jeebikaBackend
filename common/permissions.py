@@ -10,3 +10,13 @@ class IsEmployeeUser(BasePermission):
 
     def has_permission(self, request, view):
         return request.user.type == UserType.EMPLOYER
+    
+    
+    
+class IsApplicantUser(BasePermission):
+    """
+    Custom permission to only allow employee users.
+    """
+
+    def has_permission(self, request, view):
+        return request.user.type == UserType.APPLICANT

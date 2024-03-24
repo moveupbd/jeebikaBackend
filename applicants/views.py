@@ -9,14 +9,14 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from rest_framework.generics import ListAPIView
 
-from common.permissions import IsEmployeeUser
+from common.permissions import IsApplicantUser
 from employees.models import job_post
 from employees.serializers import PrivateEmployeePostSerializer
 
 from .serializers import PublicApplicantRegistrationSerializer, PrivateApplicantProfileSerializer, PublicApplicantLoginSerializer
 from accountio.models import User
 from .models import Applicant
-
+from django.http import JsonResponse
 
 
 class PublicUserRegistrationView(CreateAPIView):
@@ -51,9 +51,15 @@ class PublicUserLoginView(CreateAPIView):
             access_token, refresh_token = self.generate_tokens_for_user(user)
 
             # Set cookies
-            response = Response({'tokens': {'access': access_token, 'refresh': refresh_token}, 'status': 'Login successful'}, status=status.HTTP_201_CREATED)
-            response.set_cookie('refresh_token', refresh_token, httponly=True)
-            
+            # Set the Set-Cookie header
+            response = JsonResponse(
+                {
+                    "tokens": {"access": access_token, "refresh": refresh_token},
+                    "status": "Login successful",
+                },
+                status=status.HTTP_201_CREATED,
+            )
+            response["Set-Cookie"] = f"access_token = {access_token}; HttpOnly"
             return response
             
         except User.DoesNotExist:
@@ -64,7 +70,7 @@ class PublicUserLoginView(CreateAPIView):
 
 class PrivateApplicantProfile(RetrieveUpdateAPIView):
     serializer_class = PrivateApplicantProfileSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsApplicantUser]
         
     def get_object(self):
         applicant = self.request.user.applicant
@@ -86,11 +92,4 @@ class PrivateApplicantProfile(RetrieveUpdateAPIView):
         return Response(serializer.data)
         
         
-
-class PublicEmployeeposts(ListAPIView):
-    serializer_class = PrivateEmployeePostSerializer
-    permission_classes = []
-    filter_backends = [SearchFilter]
-    search_fields = ["category__name"]
-    queryset = job_post.objects.all()
         
