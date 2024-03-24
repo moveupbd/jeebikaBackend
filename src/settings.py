@@ -155,6 +155,8 @@ CORS_ALLOWED_ORIGINS = [
     "https://jeebika.com",
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+
 # jwt settings
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
