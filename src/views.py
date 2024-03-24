@@ -1,9 +1,13 @@
 from django.http import HttpResponse
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, RetrieveAPIView
 from rest_framework.filters import SearchFilter
 
 from employees.models import job_post
 from employees.serializers import PrivateEmployeePostSerializer
+
+from rest_framework.exceptions import ValidationError
+from django.shortcuts import get_object_or_404
+
 
 
 def hello_world(request):
@@ -73,3 +77,16 @@ class PublicEmployeeposts(ListAPIView):
     filter_backends = [SearchFilter]
     search_fields = ["category__name"]
     queryset = job_post.objects.all()
+    
+    
+class PublicEmployeePostDetail(RetrieveAPIView):
+    serializer_class = PrivateEmployeePostSerializer
+
+    def get_object(self):
+        uid = self.kwargs.get("post_uid")
+        if uid is None:
+            # Handle the case where `post_uid` is not provided in the URL
+            raise ValidationError("Post UID is required.")
+
+        # Filter job_post queryset by UID
+        return get_object_or_404(job_post, uid=uid)
