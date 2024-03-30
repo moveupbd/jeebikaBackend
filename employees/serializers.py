@@ -1,9 +1,10 @@
+from django.contrib.auth.hashers import make_password
+
 from rest_framework import serializers
 
 from accountio.models import User
 from common.choices import UserType
-from .models import Employee, job_post
-from django.contrib.auth.hashers import make_password
+from .models import Employee, category, company_type, job_post, service_type
 
 class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -83,6 +84,40 @@ class PrivateEmployeeProfileSerializer(serializers.ModelSerializer):
 
 
 class PrivateEmployeePostSerializer(serializers.ModelSerializer):
+    category = serializers.CharField(write_only=True)
+    service_type = serializers.CharField(write_only=True)
+    company_type = serializers.CharField(write_only=True)
+    user_email = serializers.SerializerMethodField()
+
     class Meta:
         model = job_post
-        fields = ['uid','user', 'company_title', 'category', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'skill', 'requirements','expertise', 'experience', 'location', 'company_info','compensation', 'other_facilities', 'apply_procedure' ]
+        fields = ['uid','user_email', 'company_title', 'category', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'skill', 'requirements','expertise', 'experience', 'location', 'company_info','compensation', 'other_facilities', 'apply_procedure' ]
+
+    def get_user_email(self, obj):
+        return obj.user.email 
+    
+    def validate_category(self, value):
+        try:
+            return category.objects.get(name=value)
+        except category.DoesNotExist:
+            raise serializers.ValidationError("Category does not exist.")
+
+    def validate_service_type(self, value):
+        try:
+            return service_type.objects.get(service=value)
+        except service_type.DoesNotExist:
+            raise serializers.ValidationError("Service type does not exist.")
+    def validate_company_type(self, value):
+        try:
+            return company_type.objects.get(name=value)
+        except company_type.DoesNotExist:
+            raise serializers.ValidationError("Company type does not exist.")
+
+    def create(self, validated_data):
+        category_instance = validated_data.pop('category')
+        service_type_instance = validated_data.pop('service_type')
+        company_type_instance = validated_data.pop('company_type')
+        validated_data['category'] = category_instance
+        validated_data['service_type'] = service_type_instance
+        validated_data['company_type'] = company_type_instance
+        return super().create(validated_data)

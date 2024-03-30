@@ -9,7 +9,7 @@ class IsEmployeeUser(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user.type == UserType.EMPLOYER
+        return request.user.type == UserType.EMPLOYER or request.user.is_staff
     
     
     
@@ -19,4 +19,4 @@ class IsApplicantUser(BasePermission):
     """
 
     def has_permission(self, request, view):
-        return request.user.type == UserType.APPLICANT
+        return request.user.type == UserType.APPLICANT or request.user.is_staff

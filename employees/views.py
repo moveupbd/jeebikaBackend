@@ -1,6 +1,4 @@
-from django.shortcuts import render
 from django.contrib.auth.hashers import check_password
-from django.contrib.auth import authenticate
 
 from rest_framework.generics import (
     get_object_or_404,
@@ -9,15 +7,17 @@ from rest_framework.generics import (
     CreateAPIView,
     ListCreateAPIView,
 )
-from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.filters import SearchFilter
 from rest_framework.exceptions import ValidationError
+
+from accountio.models import User
+from common.permissions import IsEmployeeUser
+from .models import job_post
 
 from .serializers import (
     PublicEmployeeRegistrationSerializer,
@@ -25,11 +25,7 @@ from .serializers import (
     PublicEmployeeLoginSerializer,
     PrivateEmployeePostSerializer,
 )
-from accountio.models import User
-from common.permissions import IsEmployeeUser
-from .models import Employee, job_post
 
-from django.http import HttpResponse
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
