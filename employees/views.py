@@ -15,9 +15,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from rest_framework.exceptions import ValidationError
 
-from accountio.models import User
 from common.permissions import IsEmployeeUser
-from .models import job_post
+from .models import job_post, Employee
 
 from .serializers import (
     PublicEmployeeRegistrationSerializer,
@@ -54,16 +53,15 @@ class PublicEmployeeLogin(CreateAPIView):
         _password = serializer.validated_data["password"]
 
         try:
-            user = User.objects.get(
-                email__iexact=_email
-            )  # Case-insensitive email comparison
+            employee = Employee.objects.get(user__email__iexact=_email)  # Case-insensitive email comparison
+            user = employee.user
 
             if not check_password(_password, user.password):
                 raise AuthenticationFailed()
 
             access_token, refresh_token = self.generate_tokens_for_user(user)
 
-            # Set the Set-Cookie header
+            # Setting the Set-Cookie header
             response = JsonResponse(
                 {
                     "tokens": {"access": access_token, "refresh": refresh_token},
@@ -72,11 +70,9 @@ class PublicEmployeeLogin(CreateAPIView):
                 status=status.HTTP_201_CREATED,
             )
             response["Set-Cookie"] = f"access_token = {access_token}; HttpOnly"
-            # response["Set-Cookie"] = f"refresh_token:{refresh_token}; HttpOnly"
-
             return response
 
-        except User.DoesNotExist:
+        except Employee.DoesNotExist:
             raise AuthenticationFailed()
 
 

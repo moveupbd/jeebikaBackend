@@ -1,4 +1,5 @@
 from django.contrib.auth.hashers import check_password
+from django.http import JsonResponse
 
 from rest_framework.generics import RetrieveUpdateAPIView, CreateAPIView
 from rest_framework.response import Response
@@ -6,17 +7,13 @@ from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.filters import SearchFilter
-from rest_framework.generics import ListAPIView
 
+
+from accountio.models import User
 from common.permissions import IsApplicantUser
-from employees.models import job_post
-from employees.serializers import PrivateEmployeePostSerializer
+from .models import Applicant
 
 from .serializers import PublicApplicantRegistrationSerializer, PrivateApplicantProfileSerializer, PublicApplicantLoginSerializer
-from accountio.models import User
-from .models import Applicant
-from django.http import JsonResponse
 
 
 class PublicUserRegistrationView(CreateAPIView):
@@ -24,8 +21,8 @@ class PublicUserRegistrationView(CreateAPIView):
     serializer_class = PublicApplicantRegistrationSerializer
         
 
+
 class PublicUserLoginView(CreateAPIView):
-    queryset = Applicant.objects.all()
     serializer_class = PublicApplicantLoginSerializer
 
     def generate_tokens_for_user(self, user):
@@ -43,14 +40,14 @@ class PublicUserLoginView(CreateAPIView):
         _password = serializer.validated_data['password']
 
         try:
-            user = User.objects.get(email__iexact=_email)  # Case-insensitive email comparison
+            applicant = Applicant.objects.get(user__email__iexact=_email)  # Case-insensitive email comparison
+            user = applicant.user
 
             if not check_password(_password, user.password):
                 raise AuthenticationFailed()
 
             access_token, refresh_token = self.generate_tokens_for_user(user)
 
-            # Set cookies
             # Set the Set-Cookie header
             response = JsonResponse(
                 {
@@ -62,9 +59,8 @@ class PublicUserLoginView(CreateAPIView):
             response["Set-Cookie"] = f"access_token = {access_token}; HttpOnly"
             return response
             
-        except User.DoesNotExist:
+        except Applicant.DoesNotExist:
             raise AuthenticationFailed()
-
 
 
 
