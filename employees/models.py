@@ -4,11 +4,11 @@ from common.models import BaseModelWithUID
 from accountio.models import User
 from common.choices import CompanySize
 
-class Industry_type(models.Model):
-    type = models.CharField(max_length=100)
+class company_type(BaseModelWithUID):
+    name = models.CharField(max_length=150)
     
     def __str__(self):
-        return self.type
+        return self.name
     
 class License_type(models.Model):
     type = models.CharField(max_length=100)
@@ -23,7 +23,7 @@ class Employee(AbstractBaseUser, BaseModelWithUID):
     company_address = models.TextField(blank=True, null=True)
     company_logo = models.ImageField(upload_to='images/company_logos/', blank=True, null=True)
     website_url = models.TextField(blank=True, null=True)
-    industry_type = models.ForeignKey(Industry_type, on_delete=models.CASCADE, null=False)
+    company_type = models.ForeignKey(company_type, default="", on_delete=models.CASCADE, null=True, blank=True)
     year_of_eastablishment = models.PositiveIntegerField(blank=True, null=True)
     license_type = models.ForeignKey(License_type, on_delete=models.CASCADE, default="", null=False)
     license_number = models.PositiveIntegerField(blank=True, null=True)
@@ -49,13 +49,6 @@ class category(BaseModelWithUID):
     def __str__(self):
         return self.name
     
-class company_type(BaseModelWithUID):
-    name = models.CharField(max_length=150)
-    
-    def __str__(self):
-        return self.name
-    
-    
     
 class service_type(models.Model):
     service = models.CharField(max_length=100)
@@ -68,7 +61,7 @@ class job_post(BaseModelWithUID):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default="", related_name='job_posts')
     category = models.ForeignKey(category, on_delete=models.CASCADE)
     service_type = models.ForeignKey(service_type, on_delete=models.CASCADE)
-    company_title = models.CharField(max_length=200)
+    company_name = models.CharField(max_length=200, blank=True, null=True)
     company_type = models.ForeignKey(company_type, default="", on_delete=models.CASCADE, null=True, blank=True)
     job_designation = models.CharField(max_length=100, null=True, blank=True)
     vacancy = models.PositiveIntegerField(null=True, blank=True)
@@ -89,5 +82,5 @@ class job_post(BaseModelWithUID):
     apply_procedure = models.CharField(max_length=100, null=True, blank=True)
     
     def __str__(self):
-        return self.company_title
+        return self.job_designation
     

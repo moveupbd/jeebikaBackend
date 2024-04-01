@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.contrib.auth.hashers import check_password
 
 from rest_framework.generics import (
@@ -31,8 +32,6 @@ from rest_framework_simplejwt.tokens import RefreshToken
 class PublicEmployeeRegistrationView(CreateAPIView):
     serializer_class = PublicEmployeeRegistrationSerializer
 
-
-from django.http import JsonResponse
 
 
 class PublicEmployeeLogin(CreateAPIView):
@@ -123,6 +122,9 @@ class PrivateEmployeePostDetail(RetrieveUpdateDestroyAPIView):
     serializer_class = PrivateEmployeePostSerializer
     permission_classes = [IsAuthenticated, IsEmployeeUser]
 
+    def get_queryset(self):
+        return job_post.objects.all()
+
     def get_object(self):
         uid = self.kwargs.get("post_uid")
         if uid is None:
@@ -131,3 +133,8 @@ class PrivateEmployeePostDetail(RetrieveUpdateDestroyAPIView):
 
         # Filter job_post queryset by UID
         return get_object_or_404(job_post, uid=uid)
+    
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.delete()
+        return Response({"message": "Successfully deleted the post."}, status=status.HTTP_204_NO_CONTENT)
