@@ -122,21 +122,18 @@ class PrivateEmployeeProfileSerializer(serializers.ModelSerializer):
     
 
 class PrivateEmployeePostSerializer(serializers.ModelSerializer):
-    category = serializers.CharField(write_only=True)
-    service_type = serializers.CharField(write_only=True)
-    company_type = serializers.CharField(write_only=True)
+    category = serializers.CharField()
+    service_type = serializers.CharField()
+    company_type = serializers.CharField()
     user_email = serializers.SerializerMethodField()
-    category = serializers.CharField(source='category.name', read_only=True)
-    service_type = serializers.CharField(source='service_type.service', read_only=True)
-    company_type = serializers.CharField(source='company_type.name', read_only=True)
 
     class Meta:
         model = job_post
-        fields = ['uid', 'user_email', 'category', 'company_name', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'skill', 'requirements', 'expertise', 'experience', 'location', 'company_info', 'compensation', 'other_facilities', 'apply_procedure']
+        fields = ['uid','user_email', 'company_name', 'category', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'skill', 'requirements','expertise', 'experience', 'location', 'company_info','compensation', 'other_facilities', 'apply_procedure' ]
 
     def get_user_email(self, obj):
         return obj.user.email 
-    
+
     def validate_category(self, value):
         try:
             return category.objects.get(name=value)
@@ -148,7 +145,6 @@ class PrivateEmployeePostSerializer(serializers.ModelSerializer):
             return service_type.objects.get(service=value)
         except service_type.DoesNotExist:
             raise serializers.ValidationError("Service type does not exist.")
-    
     def validate_company_type(self, value):
         try:
             return company_type.objects.get(name=value)
@@ -163,6 +159,7 @@ class PrivateEmployeePostSerializer(serializers.ModelSerializer):
         validated_data['service_type'] = service_type_instance
         validated_data['company_type'] = company_type_instance
         return super().create(validated_data)
+
 
 
 
