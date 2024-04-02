@@ -24,6 +24,7 @@ from .serializers import (
     PrivateEmployeeProfileSerializer,
     PublicEmployeeLoginSerializer,
     PrivateEmployeePostSerializer,
+    PrivateEmployeePostSerializerbyadmin
 )
 
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -122,18 +123,21 @@ class PrivateEmployeeposts(ListCreateAPIView):
         serializer.save(user=self.request.user)
 
 class PrivateEmployeepostsByadmin(ListCreateAPIView):
-    serializer_class = PrivateEmployeePostSerializer
+    serializer_class = PrivateEmployeePostSerializerbyadmin
     permission_classes = [IsAuthenticated, IsAdminUser]
     filter_backends = [SearchFilter]
     search_fields = ["category__name"]
 
     def get_queryset(self):
-        user = self.request.user
-        return job_post.objects.filter(user=user)
+        # Return the queryset based on the currently authenticated user
+        return job_post.objects.all().order_by('-updated_at')[:5]
 
     def perform_create(self, serializer):
-        # Automatically set the user field to the authenticated user during creation
-        serializer.save(user=self.request.user)
+        # Retrieve the selected user ID from the request data
+        selected_user_id = self.request.data.get('user')
+        
+        # Pass the selected user ID to the serializer
+        serializer.save(user_id=selected_user_id)
 
 
 class PrivateEmployeePostDetail(RetrieveUpdateDestroyAPIView):

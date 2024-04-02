@@ -119,17 +119,20 @@ class PrivateEmployeeProfileSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         data = super().to_representation(instance)
         return data
-
+    
 
 class PrivateEmployeePostSerializer(serializers.ModelSerializer):
     category = serializers.CharField(write_only=True)
     service_type = serializers.CharField(write_only=True)
     company_type = serializers.CharField(write_only=True)
     user_email = serializers.SerializerMethodField()
+    category = serializers.CharField(source='category.name', read_only=True)
+    service_type = serializers.CharField(source='service_type.service', read_only=True)
+    company_type = serializers.CharField(source='company_type.name', read_only=True)
 
     class Meta:
         model = job_post
-        fields = ['uid','user_email', 'company_name', 'category', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'skill', 'requirements','expertise', 'experience', 'location', 'company_info','compensation', 'other_facilities', 'apply_procedure' ]
+        fields = ['uid', 'user_email', 'category', 'company_name', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'skill', 'requirements', 'expertise', 'experience', 'location', 'company_info', 'compensation', 'other_facilities', 'apply_procedure']
 
     def get_user_email(self, obj):
         return obj.user.email 
@@ -145,6 +148,7 @@ class PrivateEmployeePostSerializer(serializers.ModelSerializer):
             return service_type.objects.get(service=value)
         except service_type.DoesNotExist:
             raise serializers.ValidationError("Service type does not exist.")
+    
     def validate_company_type(self, value):
         try:
             return company_type.objects.get(name=value)
@@ -159,3 +163,57 @@ class PrivateEmployeePostSerializer(serializers.ModelSerializer):
         validated_data['service_type'] = service_type_instance
         validated_data['company_type'] = company_type_instance
         return super().create(validated_data)
+
+
+
+
+class PrivateEmployeePostSerializerbyadmin(serializers.ModelSerializer):
+    category = serializers.PrimaryKeyRelatedField(queryset=category.objects.all())
+    service_type = serializers.PrimaryKeyRelatedField(queryset=service_type.objects.all())
+    company_type = serializers.PrimaryKeyRelatedField(queryset=company_type.objects.all())
+    user = serializers.PrimaryKeyRelatedField(queryset=User.objects.all())
+    company_name = serializers.CharField(read_only=True)  # Making company_name read-only
+    
+    class Meta:
+        model = job_post
+        fields = ['uid', 'user', 'company_name', 'category', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'skill', 'requirements','expertise', 'experience', 'location', 'company_info','compensation', 'other_facilities', 'apply_procedure' ]
+
+    def validate_category(self, value):
+        try:
+            return category.objects.get(name=value)
+        except category.DoesNotExist:
+            raise serializers.ValidationError("Category does not exist.")
+
+    def validate_service_type(self, value):
+        try:
+            return service_type.objects.get(service=value)
+        except service_type.DoesNotExist:
+            raise serializers.ValidationError("Service type does not exist.")
+
+    def create(self, validated_data):
+        category_instance = validated_data.pop('category')
+        service_type_instance = validated_data.pop('service_type')
+        company_type_instance = validated_data.pop('company_type')
+        
+        # Retrieve the user from validated_data
+        user = validated_data.get('user')
+        
+        try:
+            # Get the associated Employee and retrieve its company_name
+            employee = Employee.objects.get(user=user)
+            company_name = employee.company_name
+        except Employee.DoesNotExist:
+            # Handle the case where no matching Employee instance is found
+            # You can raise an error, log a message, or provide a default value for company_name
+            company_name = "Zafar Org"
+        
+        validated_data['category'] = category_instance
+        validated_data['service_type'] = service_type_instance
+        validated_data['company_type'] = company_type_instance
+        validated_data['company_name'] = company_name  # Assign the company_name
+        
+        return super().create(validated_data)
+
+
+
+
