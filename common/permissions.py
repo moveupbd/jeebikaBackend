@@ -20,3 +20,12 @@ class IsApplicantUser(BasePermission):
 
     def has_permission(self, request, view):
         return request.user.type == UserType.APPLICANT or request.user.is_staff
+    
+
+class IsAdminUser(BasePermission):
+    """
+    Custom permission to only allow employee users.
+    """
+
+    def has_permission(self, request, view):
+        return request.user.is_staff

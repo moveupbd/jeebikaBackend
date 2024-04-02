@@ -16,7 +16,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.filters import SearchFilter
 from rest_framework.exceptions import ValidationError
 
-from common.permissions import IsEmployeeUser
+from common.permissions import IsEmployeeUser, IsAdminUser
 from .models import job_post, Employee
 
 from .serializers import (
@@ -30,6 +30,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 
 class PublicEmployeeRegistrationView(CreateAPIView):
+    serializer_class = PublicEmployeeRegistrationSerializer
+
+    
+class PublicEmployeeRegistrationAdminView(CreateAPIView):
     serializer_class = PublicEmployeeRegistrationSerializer
 
 
@@ -106,6 +110,20 @@ class PrivateEmployeeProfile(RetrieveUpdateAPIView):
 class PrivateEmployeeposts(ListCreateAPIView):
     serializer_class = PrivateEmployeePostSerializer
     permission_classes = [IsAuthenticated, IsEmployeeUser]
+    filter_backends = [SearchFilter]
+    search_fields = ["category__name"]
+
+    def get_queryset(self):
+        user = self.request.user
+        return job_post.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        # Automatically set the user field to the authenticated user during creation
+        serializer.save(user=self.request.user)
+
+class PrivateEmployeepostsByadmin(ListCreateAPIView):
+    serializer_class = PrivateEmployeePostSerializer
+    permission_classes = [IsAuthenticated, IsAdminUser]
     filter_backends = [SearchFilter]
     search_fields = ["category__name"]
 
