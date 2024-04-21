@@ -16,17 +16,26 @@ class License_type(models.Model):
     def __str__(self):
         return self.type
 
+class category(BaseModelWithUID):
+    name = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.name
+    
+
 # Create your models here.
 class Employee(AbstractBaseUser, BaseModelWithUID):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null=False, related_name='employee')
     company_name = models.CharField(max_length=200, blank=True, null=True)
+    category = models.ForeignKey(category, default="", on_delete=models.CASCADE)
     company_address = models.TextField(blank=True, null=True)
     company_logo = models.ImageField(upload_to='images/company_logos/', blank=True, null=True)
     website_url = models.TextField(blank=True, null=True)
     company_type = models.ForeignKey(company_type, default="", on_delete=models.CASCADE, null=True, blank=True)
+    company_subtype = models.CharField(max_length=100, blank=True, null=True)
     year_of_eastablishment = models.PositiveIntegerField(blank=True, null=True)
     license_type = models.ForeignKey(License_type, on_delete=models.CASCADE, default="", null=False)
-    license_number = models.PositiveIntegerField(blank=True, null=True)
+    license_number = models.CharField(max_length=100, blank=True, null=True)
     license_copy = models.ImageField(upload_to='images/license_copies/', blank=True, null=True)
     company_owner = models.CharField(max_length=100, blank=True, null=True)
     employee_designation = models.CharField(max_length=100, blank=True, null=True)
@@ -42,12 +51,6 @@ class Employee(AbstractBaseUser, BaseModelWithUID):
     def __str__(self):
         return self.user.username
     
-
-class category(BaseModelWithUID):
-    name = models.CharField(max_length=100)
-    
-    def __str__(self):
-        return self.name
     
     
 class service_type(models.Model):
@@ -59,7 +62,7 @@ class service_type(models.Model):
       
 class job_post(BaseModelWithUID):
     user = models.ForeignKey(User, on_delete=models.CASCADE, default="", related_name='job_posts')
-    category = models.ForeignKey(category, on_delete=models.CASCADE)
+    category = models.ForeignKey(category,default="", on_delete=models.CASCADE)
     service_type = models.ForeignKey(service_type, on_delete=models.CASCADE)
     company_name = models.CharField(max_length=200, blank=True, null=True)
     company_type = models.ForeignKey(company_type, default="", on_delete=models.CASCADE, null=True, blank=True)

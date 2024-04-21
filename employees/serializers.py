@@ -22,12 +22,13 @@ class PublicEmployeeRegistrationSerializer(serializers.ModelSerializer):
     user = PublicUserSerializer()
 
     # Define fields for company_type and license_type as strings
+    category = serializers.CharField()
     company_type = serializers.CharField(write_only=True)
     license_type = serializers.CharField(write_only=True)
 
     class Meta:
         model = Employee
-        fields = ['user', 'password', 'confirm_password', 'company_name', 'company_address', 'company_logo', 'website_url', 'company_size', 'company_type', 'id_card_front', 'id_card_back','year_of_eastablishment', 'business_desc', 'license_type', 'license_number', 'license_copy', 'company_owner', 'employee_designation', 'employee_mobile', 'employee_email', 'employee_address']
+        fields = ['user', 'password', 'confirm_password', 'category', 'company_name', 'company_address', 'company_logo', 'website_url', 'company_size', 'company_type', 'company_subtype', 'id_card_front', 'id_card_back','year_of_eastablishment', 'business_desc', 'license_type', 'license_number', 'license_copy', 'company_owner', 'employee_designation', 'employee_mobile', 'employee_email', 'employee_address']
         extra_kwargs = {
             'password': {'write_only': True}
         }
@@ -38,6 +39,12 @@ class PublicEmployeeRegistrationSerializer(serializers.ModelSerializer):
         if password != confirm_password:
             raise serializers.ValidationError({"Error": ["Passwords do not match!"]})
         return attrs
+    
+    def validate_category(self, value):
+        try:
+            return category.objects.get(name=value)
+        except category.DoesNotExist:
+            raise serializers.ValidationError("Category does not exist.")
 
     def create(self, validated_data):
         user_data = validated_data.pop('user')
@@ -94,13 +101,17 @@ class PrivateEmployeeProfileSerializer(serializers.ModelSerializer):
     user = PrivateUserSerializer()
     company_type = serializers.SerializerMethodField()
     license_type = serializers.SerializerMethodField()
+    category = serializers.SerializerMethodField() 
 
     class Meta:
         model = Employee
-        fields = ['user', 'company_name', 'company_address', 'company_logo', 'website_url', 'company_size', 'company_type', 'id_card_front', 'id_card_back','year_of_eastablishment', 'business_desc', 'license_type', 'license_number', 'license_copy', 'company_owner', 'employee_designation', 'employee_mobile', 'employee_email', 'employee_address']
+        fields = ['user', 'category', 'company_name', 'company_address', 'company_logo', 'website_url', 'company_size', 'company_type', 'company_subtype', 'id_card_front', 'id_card_back','year_of_eastablishment', 'business_desc', 'license_type', 'license_number', 'license_copy', 'company_owner', 'employee_designation', 'employee_mobile', 'employee_email', 'employee_address']
 
     def get_company_type(self, obj):
         return obj.company_type.name if obj.company_type else None
+    
+    def get_category(self, obj): 
+        return obj.category.name if obj.category else None
 
     def get_license_type(self, obj):
         return obj.license_type.type if obj.license_type else None

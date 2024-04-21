@@ -27,7 +27,7 @@ from .views import hello_world, PublicEmployeeposts, PublicEmployeePostDetail
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('adminium/', admin.site.urls),
     path("", hello_world, name='hello_world'),
     path("job-posts/", PublicEmployeeposts.as_view(), name='alljobposts'),
     path("job-posts/<uuid:post_uid>/", PublicEmployeePostDetail.as_view(), name='viewjobpost'),
