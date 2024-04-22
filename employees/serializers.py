@@ -6,6 +6,8 @@ from accountio.models import User
 from common.choices import UserType
 from .models import Employee, category, company_type, job_post, service_type
 
+import json 
+
 class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
@@ -17,20 +19,18 @@ class PublicUserSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError({"Error": ["username must be greated than 4 and less than 12!"]}) # 12 size is fixed in the model
         return attrs
 
+from django.db import IntegrityError
+
 class PublicEmployeeRegistrationSerializer(serializers.ModelSerializer):
     confirm_password = serializers.CharField(style={'input_type': 'password'}, write_only=True)
-    user = PublicUserSerializer()
+    user = serializers.CharField(write_only=True)
 
-    # Define fields for company_type as strings
     category = serializers.CharField()
     company_type = serializers.CharField(write_only=True)
 
     class Meta:
         model = Employee
-        fields = ['user', 'password', 'confirm_password', 'category', 'company_address', 'company_logo', 'website_url', 'company_size', 'company_type', 'company_subtype', 'id_card_front', 'id_card_back','year_of_eastablishment', 'business_desc', 'license_number', 'license_copy', 'representative_name', 'representative_designation', 'representative_mobile', 'representative_email']
-        extra_kwargs = {
-            'password': {'write_only': True}
-        }
+        fields = ['user', 'password', 'confirm_password', 'category', 'company_address', 'company_logo', 'website_url', 'company_size', 'company_type', 'company_subtype', 'id_card_front', 'id_card_back', 'year_of_eastablishment', 'business_desc', 'license_number', 'license_copy', 'representative_name', 'representative_designation', 'representative_mobile', 'representative_email']
 
     def validate(self, attrs):
         password = attrs.get('password')
@@ -46,30 +46,39 @@ class PublicEmployeeRegistrationSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Category does not exist.")
 
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
+        user_data = json.loads(validated_data.pop('user'))
         password = validated_data.pop('password')
         confirm_password = validated_data.pop('confirm_password')
 
-        # Retrieve company_type from validated data
         company_type_name = validated_data.pop('company_type')
 
         if password != confirm_password:
             raise serializers.ValidationError({"Error": ["Passwords do not match!"]})
 
-        # Get or create company_type objects
         try:
             company_type_obj = company_type.objects.get(name=company_type_name)
         except:
             raise serializers.ValidationError({"Error": ["Company type does not exist."]})
         
+        try:
+            user = User.objects.create_user(**user_data, password=password, type=UserType.EMPLOYER)
+        except IntegrityError:
+            raise serializers.ValidationError({"Error": ["Email or username must be unique."]})
+        except ValueError:
+            raise serializers.ValidationError({"Error": ["Email or username must be provided."]})
+        
+        try:
+            employee = Employee.objects.create(
+                user=user,
+                password=make_password(password),
+                company_type=company_type_obj,
+                **validated_data
+            )
+        except IntegrityError:
+            # Rollback user creation if employee creation fails
+            user.delete()
+            raise serializers.ValidationError({"Error": ["Email or username must be unique."]})
 
-        user = User.objects.create_user(**user_data, password=password, type=UserType.EMPLOYER)
-        Employee.objects.create(
-            user=user,
-            password=make_password(password),
-            company_type=company_type_obj,
-            **validated_data
-        )
         return user
 
     def to_representation(self, instance):
