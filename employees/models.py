@@ -29,7 +29,7 @@ class Employee(AbstractBaseUser, BaseModelWithUID):
     company_subtype = models.CharField(max_length=100, blank=True, null=True)
     year_of_eastablishment = models.PositiveIntegerField(blank=True, null=True)
     license_number = models.CharField(max_length=100, blank=True, null=True)
-    license_copy = models.ImageField(upload_to='images/license_copies/', blank=True, null=True)
+    license_copy = models.FileField(upload_to='license_copies/', blank=True, null=True)
     representative_name = models.CharField(max_length=200, blank=True, null=True)
     representative_designation = models.CharField(max_length=100, blank=True, null=True)
     representative_mobile = models.CharField(max_length=100, blank=True, null=True)
@@ -64,6 +64,8 @@ class job_post(BaseModelWithUID):
     job_desc = models.TextField(null=True, blank=True)
     published = models.DateField(null=True, blank=True)
     deadline = models.DateField(null=True, blank=True)
+    education = models.TextField(null=True, blank=True)
+    education_brief = models.TextField(null=True, blank=True)
     skill = models.TextField(null=True, blank=True)
     experience = models.TextField(null=True, blank=True)
     requirements= models.TextField(null=True, blank=True)
@@ -75,6 +77,8 @@ class job_post(BaseModelWithUID):
     compensation = models.CharField(max_length=200, null=True, blank=True)
     other_facilities = models.TextField(null=True, blank=True)
     apply_procedure = models.CharField(max_length=100, null=True, blank=True)
+    source = models.CharField(max_length=150, null=True, blank=True)
+    source_prove = models.FileField(upload_to='sources/', null=True, blank=True)
     
     def __str__(self):
         return self.job_designation

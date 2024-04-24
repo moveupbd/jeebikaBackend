@@ -3,7 +3,7 @@ from employees import views
 
 urlpatterns = [
     path("register/", views.PublicEmployeeRegistrationView.as_view(), name='register'),
-    path("register/admin/", views.PublicEmployeeRegistrationAdminView.as_view(), name='adminregister'),
+    path("register/byadmin/", views.PublicEmployeeRegistrationAdminView.as_view(), name='adminregister'),
     path("login/", views.PublicEmployeeLogin.as_view(), name='login'),
     path("profile/", views.PrivateEmployeeProfile.as_view(), name='profile'),
     path("posts/", views.PrivateEmployeeposts.as_view(), name='posts'),

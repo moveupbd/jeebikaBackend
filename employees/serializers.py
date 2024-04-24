@@ -139,7 +139,7 @@ class PrivateEmployeePostSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = job_post
-        fields = ['uid','user_email', 'company_name', 'category', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'skill', 'requirements','expertise', 'experience', 'location', 'company_info','compensation', 'other_facilities', 'apply_procedure' ]
+        fields = ['uid','user_email', 'company_name', 'category', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'education', 'education_brief', 'skill', 'requirements', 'expertise', 'experience', 'location', 'company_info','compensation', 'other_facilities', 'apply_procedure', 'source', 'source_prove' ]
 
     def get_user_email(self, obj):
         return obj.user.email 
