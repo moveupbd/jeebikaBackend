@@ -76,7 +76,7 @@ class PublicEmployeeposts(ListAPIView):
     permission_classes = []
     filter_backends = [SearchFilter]
     search_fields = ["category__name"]
-    queryset = job_post.objects.all()
+    queryset = job_post.objects.all().order_by('-id')
     
     
 class PublicEmployeePostDetail(RetrieveAPIView):

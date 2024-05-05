@@ -135,11 +135,12 @@ class PrivateEmployeePostSerializer(serializers.ModelSerializer):
     category = serializers.CharField()
     service_type = serializers.CharField()
     company_type = serializers.CharField()
+    company_logo = serializers.ImageField(source='user.employee.company_logo', read_only=True)  # Access company_logo through the related Employee model
     user_email = serializers.SerializerMethodField()
 
     class Meta:
         model = job_post
-        fields = ['uid','user_email', 'company_name', 'category', 'company_type', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'education', 'education_brief', 'skill', 'requirements', 'expertise', 'experience', 'location', 'company_info','compensation', 'other_facilities', 'apply_procedure', 'source', 'source_prove' ]
+        fields = ['uid','user_email', 'company_name', 'category', 'company_type', 'company_logo', 'service_type', 'job_designation', 'vacancy', 'department', 'published', 'deadline', 'responsibilities', 'employment_status', 'education', 'education_brief', 'skill', 'requirements', 'expertise', 'experience', 'location', 'company_info','compensation', 'other_facilities', 'apply_procedure', 'source', 'source_prove']  
 
     def get_user_email(self, obj):
         return obj.user.email 
@@ -155,6 +156,7 @@ class PrivateEmployeePostSerializer(serializers.ModelSerializer):
             return service_type.objects.get(service=value)
         except service_type.DoesNotExist:
             raise serializers.ValidationError("Service type does not exist.")
+    
     def validate_company_type(self, value):
         try:
             return company_type.objects.get(name=value)
@@ -169,8 +171,6 @@ class PrivateEmployeePostSerializer(serializers.ModelSerializer):
         validated_data['service_type'] = service_type_instance
         validated_data['company_type'] = company_type_instance
         return super().create(validated_data)
-
-
 
 
 
